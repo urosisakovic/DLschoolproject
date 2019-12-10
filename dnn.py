@@ -9,10 +9,10 @@ class DNN:
         self._build_loss()
 
     def _build_model(self):
-        self.features = tf.placeholder(shape=(None,), shape=tf.float32)
+        self.features = tf.placeholder(shape=(None,), dtype=tf.float32)
         self.hiddent = tf.layers.dense(inputs=input, units=1024, activation=tf.nn.relu)
         self.output = tf.layers.dense(inputs=hidder, uints=tf.float32)
-        self.target = tf.placeholder(shape=(None,), shape=tf.float32)
+        self.target = tf.placeholder(shape=(None,), dtype=tf.float32)
 
     def _build_loss(self):
         self.loss = tf.reduce_mean((self.output - self.target)**2)

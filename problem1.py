@@ -5,7 +5,7 @@ import config
 from dnn import DNN
 
 def generate_data(A, B, f1, f2):
-    x = np.linspace(0, 100, 200)
+    x = np.linspace(0, 0.7, 200)
     h = A * np.sin(2 * np.pi * f1 * x) \
         + B * np.sin(2 * np.pi* f2 *x)
 
@@ -27,13 +27,14 @@ def main():
     
     # TODO: Add legend on graphs
     # save true function graph as an image
-    plt.plot(input, true_function)
+    plt.plot(input, true_function, 'b-', linewidth=2, alpha=1)
     plt.savefig('problem1_1.png', dpi=300)
     
     # save true and noisy function graph as an image
-    plt.plot(input, noisy_function)
+    plt.plot(input, noisy_function, 'r-', linewidth=2, alpha=0.8)
     plt.savefig('problem1_2.png', dpi=300)
 
+    quit()
 
     # ML conventional aliases
     features = input

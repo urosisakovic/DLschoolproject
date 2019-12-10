@@ -17,6 +17,12 @@ class DNN:
     def _build_loss(self):
         self.loss = tf.reduce_mean((self.output - self.target)**2)
 
+    def change_model(self):
+        pass
+
+    def change_loss(self):
+        pass
+
     def train(self, features_train, target_train, features_val, target_val, features_test, target_test, steps):
         optimizer = tf.train.AdamOptimizer()
         train_step = optimizer.minimize(self.loss)

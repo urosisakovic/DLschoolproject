@@ -1,7 +1,6 @@
 from easydict import EasyDict as edict
 
 #TODO: All caps
-
 C = edict()
 C.PRIVATE = edict()
 

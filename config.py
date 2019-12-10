@@ -19,8 +19,6 @@ C.B = (C.PRIVATE.B2 + C.PRIVATE.G2) % 4 + 3
 C.f1 = 5 * (C.PRIVATE.B1_digit_sum % 4 + 1)
 C.f2 = 5 * (C.PRIVATE.B2_digit_sum % 4 + 1)
 
-C.VERBOSE = True
-
 # Problem1 hyperparameters:
 C.PROBLEM1 = edict()
 C.PROBLEM1.INTERVAL_START = 0

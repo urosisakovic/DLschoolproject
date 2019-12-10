@@ -8,14 +8,14 @@ from tensorflow.keras.utils import plot_model
 from tensorflow.keras.callbacks import TensorBoard
 
 def generate_data(A, B, f1, f2):
-    x = np.linspace(0, 0.7, 200)
+    x = np.linspace(0, 0.7, 80)
     
     # true function
     h = A * np.sin(2 * np.pi * f1 * x) \
         + B * np.sin(2 * np.pi* f2 *x)
 
     # function with added gaussian noise
-    y = h + np.random.normal(scale=0.2 * min(A, B), size=h.shape)
+    y = h + np.random.normal(scale=0.2*min(A, B), size=h.shape)
 
     return x, h, y
 
@@ -63,22 +63,22 @@ def main():
     # alias
     conf = config.C
 
-    smapled_points, true_function, noisy_function = generate_data(conf.A,
+    sampled_points, true_function, noisy_function = generate_data(conf.A,
                                                                   conf.B,
                                                                   conf.f1,
                                                                   conf.f2)
     
     # TODO: Add legend on graphs
     # save true function graph as an image
-    plt.plot(smapled_points, true_function, 'b-', linewidth=2, alpha=1)
+    plt.plot(sampled_points, true_function, 'b-', linewidth=2, alpha=1)
     plt.savefig('images/p1_true_function.png', dpi=300)
     
     # save true and noisy function graph as an image
-    plt.plot(smapled_points, noisy_function, 'r-', linewidth=2, alpha=0.8)
+    plt.plot(sampled_points, noisy_function, 'r-', linewidth=2, alpha=0.8)
     plt.savefig('images/p1_noisy_function.png', dpi=300)
 
     # ML conventional aliases
-    features = smapled_points
+    features = sampled_points
     target = noisy_function
 
     # train, validation, test split
@@ -92,10 +92,6 @@ def main():
                                 ratio_train=0.8,
                                 ratio_val=0,
                                 ratio_test=0.2)
-
-    if conf.VERBOSE:
-        print('train and validation dataset size: ', features_train.shape)
-        print('test dataset size: ', features_test.shape)
 
     # create a regression model
     model = Sequential()
@@ -126,38 +122,34 @@ def main():
                   loss='mse')
 
     tensorboard = TensorBoard(
-        log_dir='.\logs',
-        histogram_freq=1,
-        write_images=True
-        )
+        log_dir='logs',
+        histogram_freq=1
+    )
     keras_callbacks = [
         tensorboard
-        ]
+    ]
 
-    for _ in range(conf.PROBLEM1.EPOCHS):
-        model.fit(x=features_train,
-                  y=target_train,
-                  validation_split=0.25,
-                  epochs=1,
-                  batch_size=120,
-                  callbacks=keras_callbacks)
-        model.evaluate(x=features_test,
-                       y=target_test)
+    #for _ in range(conf.PROBLEM1.EPOCHS):
+    model.fit(x=features_train,
+              y=target_train,
+              validation_split=0.25,
+              epochs=1000,
+              batch_size=120,
+              callbacks=keras_callbacks)
+        # model.evaluate(x=features_test,
+        #                y=target_test)
 
+    pred = model.predict(sampled_points, batch_size=100)
 
-    # # plot train, validation and test losses
-    # plt.clf()
-    # plt.plot(train_loss)
-    # plt.plot(validation_loss)
-    # plt.plot(test_loss)
+    pred = np.squeeze(pred, axis=-1)
 
-    # # calculate learned function
-    # learned_function = regressor.predict(features)
-
-    # # plot function learned by the model
-    # plt.clf()  
-    # plt.plot(features, target)
-    # plt.plot(features, learned_function)
+    # clear current figure
+    plt.clf()
+    # plot ground truth function (noisy function)
+    plt.plot(sampled_points, noisy_function, 'b-', linewidth=2, alpha=1)    
+    # plot model prediction and save it as an image
+    plt.plot(sampled_points, pred, 'r-', linewidth=2, alpha=0.8)
+    plt.savefig('images/p1_model_prediction.png', dpi=300)
 
 if __name__ == '__main__':
     main()

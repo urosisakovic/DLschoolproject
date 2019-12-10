@@ -2,8 +2,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import config
-from dnn import DNN
-
+from tensorflow.keras.layers import Activation, Dense
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.utils import plot_model
+from tensorflow.keras.callbacks import TensorBoard
 
 def generate_data(A, B, f1, f2):
     x = np.linspace(0, 0.7, 200)
@@ -81,27 +83,66 @@ def main():
 
     # train, validation, test split
     features_train, \
-    features_val,   \
+    _,              \
     features_test,  \
     target_train,   \
-    target_val,     \
-    target_test = split_dataset(features, target)
+    _,              \
+    target_test = split_dataset(features,
+                                target,
+                                ratio_train=0.8,
+                                ratio_val=0,
+                                ratio_test=0.2)
 
     if conf.VERBOSE:
-        print('train dataset size: ', features_train.shape)
-        print('validation dataset size: ', features_val.shape)
+        print('train and validation dataset size: ', features_train.shape)
         print('test dataset size: ', features_test.shape)
 
     # create a regression model
-    regressor = DNN()
-    regressor.build()
-    # train_loss, val_loss, test_loss = regressor.train(features_train,
-                                                    #   target_train,
-                                                    #   features_val,
-                                                    #   target_val,
-                                                    #   features_test,
-                                                    #   target_test,
-                                                    #   conf.PROBLEM1.steps)
+    model = Sequential()
+
+    model.add(Dense(256, input_dim=1))
+    model.add(Activation('relu'))
+    model.add(Dense(256))
+    model.add(Activation('relu'))
+    model.add(Dense(256))
+    model.add(Activation('relu'))
+    model.add(Dense(512))
+    model.add(Activation('relu'))
+    model.add(Dense(512))
+    model.add(Activation('relu'))
+    model.add(Dense(512))
+    model.add(Activation('relu'))
+    model.add(Dense(512))
+    model.add(Activation('relu'))
+    model.add(Dense(1024))
+    model.add(Activation('relu'))
+    model.add(Dense(1024))
+    model.add(Activation('relu'))
+    model.add(Dense(1))
+
+    plot_model(model, to_file='problem1_3.png')
+
+    model.compile(optimizer='adam',
+                  loss='mse')
+
+    tensorboard = TensorBoard(
+        log_dir='.\logs',
+        histogram_freq=1,
+        write_images=True
+        )
+    keras_callbacks = [
+        tensorboard
+        ]
+
+    for _ in range(conf.PROBLEM1.EPOCHS):
+        model.fit(x=features_train,
+                  y=target_train,
+                  validation_split=0.25,
+                  epochs=1,
+                  batch_size=120)
+        model.evaluate(x=features_test,
+                       y=target_test)
+
 
     # # plot train, validation and test losses
     # plt.clf()

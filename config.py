@@ -23,6 +23,7 @@ C.VERBOSE = True
 
 # Problem1 hyperparameters:
 C.PROBLEM1 = edict()
-C.PROBLEM1.interval_start = 0
-C.PROBLEM1.interval_end = 100
-C.PROBLEM1.steps = 1000
+C.PROBLEM1.INTERVAL_START = 0
+C.PROBLEM1.INTERVAL_END = 100
+C.PROBLEM1.STEPS = 1000
+C.PROBLEM1.EPOCHS = 1000

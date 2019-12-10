@@ -1,7 +1,7 @@
 import tensorflow as tf
 
 class DNN:
-    def __init__():
+    def __init__(self):
         pass
 
     def build(self):

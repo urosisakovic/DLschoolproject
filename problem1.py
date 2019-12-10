@@ -71,11 +71,11 @@ def main():
     # TODO: Add legend on graphs
     # save true function graph as an image
     plt.plot(smapled_points, true_function, 'b-', linewidth=2, alpha=1)
-    plt.savefig('problem1_1.png', dpi=300)
+    plt.savefig('images/p1_true_function.png', dpi=300)
     
     # save true and noisy function graph as an image
     plt.plot(smapled_points, noisy_function, 'r-', linewidth=2, alpha=0.8)
-    plt.savefig('problem1_2.png', dpi=300)
+    plt.savefig('images/p1_noisy_function.png', dpi=300)
 
     # ML conventional aliases
     features = smapled_points
@@ -120,7 +120,7 @@ def main():
     model.add(Activation('relu'))
     model.add(Dense(1))
 
-    plot_model(model, to_file='problem1_3.png')
+    plot_model(model, to_file='images/p1_model.png')
 
     model.compile(optimizer='adam',
                   loss='mse')
@@ -139,7 +139,8 @@ def main():
                   y=target_train,
                   validation_split=0.25,
                   epochs=1,
-                  batch_size=120)
+                  batch_size=120,
+                  callbacks=keras_callbacks)
         model.evaluate(x=features_test,
                        y=target_test)
 

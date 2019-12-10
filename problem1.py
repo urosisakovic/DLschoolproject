@@ -2,10 +2,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import config
+from tensorflow.keras.callbacks import TensorBoard
 from tensorflow.keras.layers import Activation, Dense
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.utils import plot_model
-from tensorflow.keras.callbacks import TensorBoard
+
 
 def generate_data(A, B, f1, f2):
     x = np.linspace(0, 0.7, 80)

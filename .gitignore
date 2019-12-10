@@ -41,6 +41,8 @@ uitests/out/**
 !build/
 *.png
 *logs/**
+data2/
+data3/
 
 # TODO (GH-8925) This is temporary.  We will remove it when we adjust
 # tests to not leave the file behind.

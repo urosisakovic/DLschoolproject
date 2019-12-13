@@ -7,6 +7,9 @@ from tensorflow.keras.callbacks import TensorBoard
 from tensorflow.keras.layers import Activation, Dense
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.utils import plot_model
+from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
+from sklearn.metrics import accuracy_score
 
 
 def plot_and_prep_data(filepath):
@@ -45,9 +48,11 @@ def plot_and_prep_data(filepath):
 def create_underfitting_model():
     model = Sequential()
 
-    model.add(Dense(256, input_dim=2, activation='relu'))
-    model.add(Dense(256, activation='relu'))
-    model.add(Dense(1))
+    model.add(Dense(64, input_dim=2, activation='relu'))
+    model.add(Dense(1, activation='sigmoid'))
+
+    model.compile(optimizer='adam',
+                  loss='binary_crossentropy')
 
     return model
 
@@ -55,14 +60,15 @@ def create_underfitting_model():
 def create_optimal_model():
     model = Sequential()
 
-    # model.add(Dense(256, input_dim=1, activation='relu'))
-    # model.add(Dense(256), activation='relu')
-    # model.add(Dense(256), activation='relu')
-    # model.add(Dense(512), activation='relu')
-    # model.add(Dense(512), activation='relu')
-    # model.add(Dense(1024), activation='relu')
-    # model.add(Dense(1024), activation='relu')
-    # model.add(Dense(1))
+    model.add(Dense(256, input_dim=2, activation='relu'))
+    model.add(Dense(256, activation='relu'))
+    model.add(Dense(256, activation='relu'))
+    model.add(Dense(512, activation='relu'))
+    model.add(Dense(1024, activation='relu'))
+    model.add(Dense(1, activation='sigmoid'))
+
+    model.compile(optimizer='adam',
+                  loss='binary_crossentropy')
 
     return model
 
@@ -70,7 +76,7 @@ def create_optimal_model():
 def create_overfitting_model():
     model = Sequential()
 
-    model.add(Dense(256, input_dim=1, activation='relu'))
+    model.add(Dense(256, input_dim=2, activation='relu'))
     model.add(Dense(256, activation='relu'))
     model.add(Dense(256, activation='relu'))
     model.add(Dense(512, activation='relu'))
@@ -79,43 +85,47 @@ def create_overfitting_model():
     model.add(Dense(512, activation='relu'))
     model.add(Dense(1024, activation='relu'))
     model.add(Dense(1024, activation='relu'))
-    model.add(Dense(1))
+    model.add(Dense(1, activation='sigmoid'))
+
+    model.compile(optimizer='adam',
+                  loss='binary_crossentropy')
 
     return model
 
 
-def train_and_evaluate_model(model, features, target):
-    model.compile(optimizer='adam',
-                  loss='binary_crossentropy')
-
-    # tensorboard = TensorBoard(
-    #     log_dir='logs',
-    #     histogram_freq=1
-    # )
-    # keras_callbacks = [
-    #     tensorboard
-    # ]
-
-    #for _ in range(conf.PROBLEM1.EPOCHS):
+def train_and_evaluate_model(model, features, target, model_name):
     model.fit(x=features,
               y=target,
               validation_split=0.2,
-              epochs=1,
+              epochs=1000,
               batch_size=120)
-              #callbacks=keras_callbacks)
+
+    acc = accuracy_score(target, model.predict(features) > 0.5)
+
+    print('Accuracy: {}'.format(acc))
 
     # plot decision boundary
-
-    x = np.linspace(-3, 3, 100)
-    y = np.linspace(-1, 6, 200)
-    x_grid, y_grid = np.meshgrid(x, y)
-    grid = np.stack([x_grid, y_grid], axis=-1)
-
+    x = np.linspace(-4, 4, 1000)
+    y = np.linspace(-2, 6, 1000)
+    xx, yy = np.meshgrid(x, y)
+    # Predict the function value for the whole gid
+    grid = np.stack([xx, yy], axis=-1)
     grid = np.reshape(grid, (-1, 2))
-
     prediction = model.predict(grid)
 
-    print(prediction.shape)
+    print(prediction.max())
+    print(prediction.min())
+    print(np.average(prediction))
+
+    prediction = prediction.reshape(xx.shape)
+    
+    prediction = prediction > .5
+
+    plt.clf()
+    plt.contourf(xx, yy, prediction, cmap=plt.cm.Spectral)
+    plt.scatter(features[:, 0], features[:, 1], c=target, cmap=plt.cm.Spectral)
+    plt.title("Logistic Regression")
+    plt.savefig('images/p2_{}_decision_boundary.png'.format(model_name), dpi=300)
 
 
 def main():
@@ -124,14 +134,20 @@ def main():
 
     features, target = plot_and_prep_data(conf.DATASET_PATH)
 
-    underfit_model = create_underfitting_model()
-    train_and_evaluate_model(underfit_model, features, target)
+    # split into training and test set
+    features_train, features_test, target_train, target_test = train_test_split(features, target, test_size=0.2)
 
-    # optimal_model = create_optimal_model()
-    # train_and_evaluate_model(optimal_model)
+    if conf.UNDERFIT:
+        underfit_model = create_underfitting_model()
+        train_and_evaluate_model(underfit_model, features_train, target_train, 'underfit')
 
-    # overfit_model = create_overfitting_model()
-    # train_and_evaluate_model(overfit_model)
+    if conf.OPTIMAL:
+        optimal_model = create_optimal_model()
+        train_and_evaluate_model(optimal_model, features_train, target_train, 'optimal')
+
+    if conf.OVERFIT:
+        overfit_model = create_overfitting_model()
+        train_and_evaluate_model(overfit_model, features_train, target_train, 'overfit')
     
 
 if __name__ == '__main__':

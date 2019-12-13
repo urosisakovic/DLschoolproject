@@ -10,7 +10,7 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.utils import plot_model
 
 def generate_data(A, B, f1, f2):
-    x = np.linspace(0, 0.7, 80)
+    x = np.linspace(0, 0.7, 240)
     
     # true function
     h = A * np.sin(2 * np.pi * f1 * x) \
@@ -102,7 +102,7 @@ def main():
     plt.plot(features, noisy_function, 'r-', linewidth=2, alpha=1, label='true function')  
     plt.plot(features_val, target_val, 'bo', linewidth=2, alpha=1, label='validation points')   
     plt.legend(loc='upper left')
-    plt.savefig('images/training_val_split.png', dpi=300)
+    plt.savefig('images/p1_training_val_split.png', dpi=300)
 
 
     # create a regression model
@@ -139,23 +139,35 @@ def main():
 
     # plot_model(model, to_file='images/p1_model.png')
 
+    train_loss = []
+    val_loss = []
+
     model.compile(optimizer=Adam(learning_rate=1e-5),
                   loss='mse')
-    model.fit(x=features_train,
-              y=target_train,
-              validation_data=(features_val, target_val),
-              epochs=5000,
-              batch_size=120)
+    history = model.fit(x=features_train,
+                        y=target_train,
+                        validation_data=(features_val, target_val),
+                        epochs=5000,
+                        batch_size=120)
+    train_loss.extend(history.history['loss'])
+    val_loss.extend(history.history['val_loss'])
 
 
     model.compile(optimizer=Adam(learning_rate=1e-6),
                   loss='mse')
-    model.fit(x=features_train,
-              y=target_train,
-              validation_split=0.25,
-              epochs=5000,
-              batch_size=120)
+    history = model.fit(x=features_train,
+                        y=target_train,
+                        validation_data=(features_val, target_val),
+                        epochs=5000,
+                        batch_size=120)
+    train_loss.extend(history.history['loss'])
+    val_loss.extend(history.history['val_loss'])
 
+    plt.clf()
+    plt.plot(train_loss, 'r-', label='training loss')
+    plt.plot(val_loss, 'b-', label='validation loss')
+    plt.xlabel('epochs')
+    plt.savefig('images/p1_train_val_loss.png', dpi=300)
 
     pred = model.predict(sampled_points, batch_size=100)
     pred = np.squeeze(pred, axis=-1)

@@ -29,6 +29,9 @@ C.PROBLEM1.EPOCHS = 100
 # Problem 2
 C.PROBLEM2 = edict()
 C.PROBLEM2.DATASET_PATH = 'data2/dataset{}.mat'.format(C.PRIVATE.P)
+C.PROBLEM2.UNDERFIT = False
+C.PROBLEM2.OPTIMAL = True
+C.PROBLEM2.OVERFIT = False
 
 # Problem 3
 C.PROBLEM3 = edict()

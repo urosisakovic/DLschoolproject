@@ -5,18 +5,12 @@ import config
 import scipy.io
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
-from tensorflow.keras.callbacks import TensorBoard
 from tensorflow.keras.layers import Activation, Dense
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.utils import plot_model
 
 
-def plot_and_prep_data(filepath):
-    data = scipy.io.loadmat(filepath)['data']
-   
-    features = data[:, :2]
-    target = data[:, 2]
-
+def scatter_plot(features, target):
     negative_indices = target == 0
     positive_indices = target != 0
 
@@ -26,22 +20,6 @@ def plot_and_prep_data(filepath):
     plt.scatter(negative_features[:, 0], negative_features[:, 1], c='red')
     plt.scatter(positive_features[:, 0], positive_features[:, 1], c='blue')
     plt.savefig('images/problem2/data_vis.png', dpi=300)
-
-    negative_target = np.zeros((negative_features.shape[0], 1))
-    negative_inputs = np.concatenate([negative_features, negative_target], axis=1)
-    np.random.shuffle(negative_inputs)
-
-    positive_target = np.ones((positive_features.shape[0], 1))
-    positive_inputs = np.concatenate([positive_features, positive_target], axis=1)
-    np.random.shuffle(positive_inputs)
-
-    inputs = np.concatenate([negative_inputs, positive_inputs], axis=0)
-    np.random.shuffle(inputs)
-
-    features = inputs[:, :2]
-    target = inputs[:, 2]
-
-    return features, target
 
 
 def create_underfitting_model():
@@ -92,61 +70,96 @@ def create_overfitting_model():
     return model
 
 
-def train_and_evaluate_model(model, features, target, model_name):
+def plot_decision_boundary(model, features, target, xmin, xmax, x_density, ymin, ymax, y_density, filepath, title):
+    # create a grid of points whose class will be predicted by the model
+    x = np.linspace(xmin, xmax, x_density)
+    y = np.linspace(ymin, ymax, y_density)
+    x_grid, y_grid = np.meshgrid(x, y)
+    grid = np.stack([x_grid, y_grid], axis=-1)
+    grid = np.reshape(grid, (-1, 2))
+    
+    # consider class positive if prediction is > 0.5, otherwise class negative
+    prediction = model.predict(grid) > .5
+    prediction = prediction.reshape(x_grid.shape)
+    
+    # plot decision boundary and save it using the given filepath
+    plt.clf()
+    plt.contourf(x_grid, y_grid, prediction, cmap=plt.cm.Spectral)
+    plt.scatter(features[:, 0], features[:, 1], c=target, cmap=plt.cm.Spectral)
+    plt.xlabel('feature1')
+    plt.ylabel('feature2')
+    plt.title(title)
+    plt.savefig(filepath, dpi=300)
+
+
+def train_and_evaluate_model(model, features, target, name, epochs, batch_size):
     model.fit(x=features,
               y=target,
               validation_split=0.2,
-              epochs=1000,
-              batch_size=120)
+              epochs=epochs,
+              batch_size=batch_size)
 
     acc = accuracy_score(target, model.predict(features) > 0.5)
+    print('Accuracy of {} model: {}'.format(name, acc))
 
-    print('Accuracy: {}'.format(acc))
-
-    # plot decision boundary
-    x = np.linspace(-4, 4, 1000)
-    y = np.linspace(-2, 6, 1000)
-    xx, yy = np.meshgrid(x, y)
-    # Predict the function value for the whole gid
-    grid = np.stack([xx, yy], axis=-1)
-    grid = np.reshape(grid, (-1, 2))
-    prediction = model.predict(grid)
-
-    print(prediction.max())
-    print(prediction.min())
-    print(np.average(prediction))
-
-    prediction = prediction.reshape(xx.shape)
-    
-    prediction = prediction > .5
-
-    plt.clf()
-    plt.contourf(xx, yy, prediction, cmap=plt.cm.Spectral)
-    plt.scatter(features[:, 0], features[:, 1], c=target, cmap=plt.cm.Spectral)
-    plt.title("Logistic Regression")
-    plt.savefig('images/problem2/{}_decision_boundary.png'.format(model_name), dpi=300)
+    plot_decision_boundary(model=model,
+                           features=features,
+                           target=target,
+                           xmin=-4.5,
+                           xmax=4.5,
+                           x_density=1000,
+                           ymin=-4.5,
+                           ymax=4.5,
+                           y_density=1000,
+                           filepath='images/problem2/{}_decision_boundary.png'.format(name),
+                           title='Decision boundary: {}'.format(name))
 
 
 def main():
     # alias
     conf = config.C.PROBLEM2
 
-    features, target = plot_and_prep_data(conf.DATASET_PATH)
+    # load data from .mat format
+    data = scipy.io.loadmat(conf.DATASET_PATH)['data']
 
-    # split into training and test set
-    features_train, features_test, target_train, target_test = train_test_split(features, target, test_size=0.2)
+    # split data onto features and target
+    features = data[:, :2]
+    target = data[:, 2]
+
+    scatter_plot(features, target)
+
+    # split data into training and test set
+    features_train, \
+    features_test,  \
+    target_train,   \
+    target_test = train_test_split(features, target, test_size=0.2)
 
     if conf.UNDERFIT:
         underfit_model = create_underfitting_model()
-        train_and_evaluate_model(underfit_model, features_train, target_train, 'underfit')
+        train_and_evaluate_model(model=underfit_model,
+                                 features=features_train, 
+                                 target=target_train,
+                                 name='underfit',
+                                 epochs=conf.EPOCHS,
+                                 batch_size=conf.BATCH_SIZE)
 
     if conf.OPTIMAL:
         optimal_model = create_optimal_model()
-        train_and_evaluate_model(optimal_model, features_train, target_train, 'optimal')
+        train_and_evaluate_model(model=optimal_model,
+                                 features=features_train,
+                                 target=target_train,
+                                 name='optimal',
+                                 epochs=conf.EPOCHS,
+                                 batch_size=conf.BATCH_SIZE)
 
     if conf.OVERFIT:
         overfit_model = create_overfitting_model()
-        train_and_evaluate_model(overfit_model, features_train, target_train, 'overfit')
+        train_and_evaluate_model(model=overfit_model,
+                                 features=features_train,
+                                 target=target_train,
+                                 name='overfit',
+                                 epochs=conf.EPOCHS,
+                                 batch_size=conf.BATCH_SIZE)
     
 
 if __name__ == '__main__':

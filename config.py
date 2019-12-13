@@ -32,3 +32,6 @@ C.PROBLEM2.DATASET_PATH = 'data2/dataset{}.mat'.format(C.PRIVATE.P)
 
 # Problem 3
 C.PROBLEM3 = edict()
+C.PROBLEM3.TEST_DATASET_PATH = 'data3/PenDigits/pendigits.tes'
+C.PROBLEM3.TRAIN_DATASET_PATH = 'data3/PenDigits/pendigits.tra'
+

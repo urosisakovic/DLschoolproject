@@ -69,7 +69,7 @@ def main():
                                                                   conf.f1,
                                                                   conf.f2)
     
-    # TODO: Add legend on graphs
+    # TODO: Add legend to graphs
     # save true function graph as an image
     plt.plot(sampled_points, true_function, 'b-', linewidth=2, alpha=1)
     plt.savefig('images/p1_true_function.png', dpi=300)
@@ -97,24 +97,15 @@ def main():
     # create a regression model
     model = Sequential()
 
-    model.add(Dense(256, input_dim=1))
-    model.add(Activation('relu'))
-    model.add(Dense(256))
-    model.add(Activation('relu'))
-    model.add(Dense(256))
-    model.add(Activation('relu'))
-    model.add(Dense(512))
-    model.add(Activation('relu'))
-    model.add(Dense(512))
-    model.add(Activation('relu'))
-    model.add(Dense(512))
-    model.add(Activation('relu'))
-    model.add(Dense(512))
-    model.add(Activation('relu'))
-    model.add(Dense(1024))
-    model.add(Activation('relu'))
-    model.add(Dense(1024))
-    model.add(Activation('relu'))
+    model.add(Dense(256, input_dim=1, activation='relu'))
+    model.add(Dense(256), activation='relu')
+    model.add(Dense(256), activation='relu')
+    model.add(Dense(512), activation='relu')
+    model.add(Dense(512), activation='relu')
+    model.add(Dense(512), activation='relu')
+    model.add(Dense(512), activation='relu')
+    model.add(Dense(1024), activation='relu')
+    model.add(Dense(1024), activation='relu')
     model.add(Dense(1))
 
     plot_model(model, to_file='images/p1_model.png')
@@ -137,8 +128,6 @@ def main():
               epochs=1000,
               batch_size=120,
               callbacks=keras_callbacks)
-        # model.evaluate(x=features_test,
-        #                y=target_test)
 
     pred = model.predict(sampled_points, batch_size=100)
 

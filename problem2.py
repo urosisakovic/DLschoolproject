@@ -3,13 +3,12 @@ import numpy as np
 
 import config
 import scipy.io
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
 from tensorflow.keras.callbacks import TensorBoard
 from tensorflow.keras.layers import Activation, Dense
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.utils import plot_model
-from sklearn.model_selection import train_test_split
-import matplotlib.pyplot as plt
-from sklearn.metrics import accuracy_score
 
 
 def plot_and_prep_data(filepath):
@@ -26,7 +25,7 @@ def plot_and_prep_data(filepath):
 
     plt.scatter(negative_features[:, 0], negative_features[:, 1], c='red')
     plt.scatter(positive_features[:, 0], positive_features[:, 1], c='blue')
-    plt.savefig('images/p2_data_vis.png', dpi=300)
+    plt.savefig('images/problem2/data_vis.png', dpi=300)
 
     negative_target = np.zeros((negative_features.shape[0], 1))
     negative_inputs = np.concatenate([negative_features, negative_target], axis=1)
@@ -125,7 +124,7 @@ def train_and_evaluate_model(model, features, target, model_name):
     plt.contourf(xx, yy, prediction, cmap=plt.cm.Spectral)
     plt.scatter(features[:, 0], features[:, 1], c=target, cmap=plt.cm.Spectral)
     plt.title("Logistic Regression")
-    plt.savefig('images/p2_{}_decision_boundary.png'.format(model_name), dpi=300)
+    plt.savefig('images/problem2/{}_decision_boundary.png'.format(model_name), dpi=300)
 
 
 def main():

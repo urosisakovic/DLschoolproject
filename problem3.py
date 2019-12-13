@@ -2,12 +2,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import config
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import KFold, cross_val_score
 from tensorflow.keras.layers import Activation, Dense
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.utils import plot_model
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import KFold
-from sklearn.metrics import accuracy_score
 from tensorflow.keras.wrappers.scikit_learn import KerasClassifier
 
 
@@ -42,7 +41,7 @@ def main():
     plt.xticks(range(10))
     plt.xlabel('Class')
     plt.ylabel('Training samples per class')
-    plt.savefig('images/p3_train_class_distribution.png', dpi=300)
+    plt.savefig('images/problem3/class_distribution.png', dpi=300)
     plt.clf()
 
     # load test data

@@ -2,11 +2,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import config
+import tensorflow as tf
 from tensorflow.keras.callbacks import TensorBoard
 from tensorflow.keras.layers import Activation, Dense
 from tensorflow.keras.models import Sequential
+from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.utils import plot_model
-
 
 def generate_data(A, B, f1, f2):
     x = np.linspace(0, 0.7, 80)
@@ -69,13 +70,13 @@ def main():
                                                                   conf.f1,
                                                                   conf.f2)
     
-    # TODO: Add legend to graphs
     # save true function graph as an image
-    plt.plot(sampled_points, true_function, 'b-', linewidth=2, alpha=1)
+    plt.plot(sampled_points, true_function, 'b-', linewidth=2, alpha=1, label='true function')
     plt.savefig('images/p1_true_function.png', dpi=300)
     
     # save true and noisy function graph as an image
-    plt.plot(sampled_points, noisy_function, 'r-', linewidth=2, alpha=0.8)
+    plt.plot(sampled_points, noisy_function, 'r-', linewidth=2, alpha=0.8, label='noisy function')
+    plt.legend(loc='upper left')
     plt.savefig('images/p1_noisy_function.png', dpi=300)
 
     # ML conventional aliases
@@ -84,61 +85,90 @@ def main():
 
     # train, validation, test split
     features_train, \
-    _,              \
+    features_val,   \
     features_test,  \
     target_train,   \
-    _,              \
+    target_val,     \
     target_test = split_dataset(features,
                                 target,
-                                ratio_train=0.8,
-                                ratio_val=0,
+                                ratio_train=0.6,
+                                ratio_val=0.2,
                                 ratio_test=0.2)
+
+    # clear current figure
+    plt.clf()
+    # plot ground truth function (noisy function)
+    plt.plot(features_train, target_train, 'ro', linewidth=2, alpha=1, label='training points')  
+    plt.plot(features, noisy_function, 'r-', linewidth=2, alpha=1, label='true function')  
+    plt.plot(features_val, target_val, 'bo', linewidth=2, alpha=1, label='validation points')   
+    plt.legend(loc='upper left')
+    plt.savefig('images/training_val_split.png', dpi=300)
+
 
     # create a regression model
     model = Sequential()
 
     model.add(Dense(256, input_dim=1, activation='relu'))
-    model.add(Dense(256), activation='relu')
-    model.add(Dense(256), activation='relu')
-    model.add(Dense(512), activation='relu')
-    model.add(Dense(512), activation='relu')
-    model.add(Dense(512), activation='relu')
-    model.add(Dense(512), activation='relu')
-    model.add(Dense(1024), activation='relu')
-    model.add(Dense(1024), activation='relu')
+    model.add(Dense(256, activation='relu'))
+    model.add(Dense(256, activation='relu'))
+    model.add(Dense(512, activation='relu'))
+    model.add(Dense(512, activation='relu'))
+    model.add(Dense(512, activation='relu'))
+    model.add(Dense(512, activation='relu'))
+    model.add(Dense(512, activation='relu'))
+    model.add(Dense(512, activation='relu'))
+    model.add(Dense(512, activation='relu'))
+    model.add(Dense(512, activation='relu'))
+    model.add(Dense(512, activation='relu'))
+    model.add(Dense(256, activation='relu'))
+    model.add(Dense(512, activation='relu'))
+    model.add(Dense(512, activation='relu'))
+    model.add(Dense(512, activation='relu'))
+    model.add(Dense(512, activation='relu'))
+    model.add(Dense(512, activation='relu'))
+    model.add(Dense(512, activation='relu'))
+    model.add(Dense(512, activation='relu'))
+    model.add(Dense(512, activation='relu'))
+    model.add(Dense(512, activation='relu'))
+    model.add(Dense(512, activation='relu'))
+    model.add(Dense(512, activation='relu'))
+    model.add(Dense(512, activation='relu'))
+    model.add(Dense(1024, activation='relu'))
+    model.add(Dense(1024, activation='relu'))
     model.add(Dense(1))
 
-    plot_model(model, to_file='images/p1_model.png')
+    # plot_model(model, to_file='images/p1_model.png')
 
-    model.compile(optimizer='adam',
+    model.compile(optimizer=Adam(learning_rate=1e-5),
                   loss='mse')
+    model.fit(x=features_train,
+              y=target_train,
+              validation_data=(features_val, target_val),
+              epochs=5000,
+              batch_size=120)
 
-    tensorboard = TensorBoard(
-        log_dir='logs',
-        histogram_freq=1
-    )
-    keras_callbacks = [
-        tensorboard
-    ]
 
-    #for _ in range(conf.PROBLEM1.EPOCHS):
+    model.compile(optimizer=Adam(learning_rate=1e-6),
+                  loss='mse')
     model.fit(x=features_train,
               y=target_train,
               validation_split=0.25,
-              epochs=1000,
-              batch_size=120,
-              callbacks=keras_callbacks)
+              epochs=5000,
+              batch_size=120)
+
 
     pred = model.predict(sampled_points, batch_size=100)
-
     pred = np.squeeze(pred, axis=-1)
 
     # clear current figure
     plt.clf()
     # plot ground truth function (noisy function)
-    plt.plot(sampled_points, noisy_function, 'b-', linewidth=2, alpha=1)    
+    plt.plot(features_train, target_train, 'ro', linewidth=2, alpha=1, label='training points')  
+    plt.plot(features, noisy_function, 'r-', linewidth=2, alpha=1, label='true function')  
+    plt.plot(features_val, target_val, 'bo', linewidth=2, alpha=1, label='validation points')   
     # plot model prediction and save it as an image
-    plt.plot(sampled_points, pred, 'r-', linewidth=2, alpha=0.8)
+    plt.plot(sampled_points, pred, 'r-', linewidth=2, alpha=0.8, label='model prediction', color='green')
+    plt.legend(loc='upper left')
     plt.savefig('images/p1_model_prediction.png', dpi=300)
 
 if __name__ == '__main__':

@@ -7,6 +7,7 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.utils import plot_model
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import KFold
+from sklearn.metrics import accuracy_score
 from tensorflow.keras.wrappers.scikit_learn import KerasClassifier
 
 
@@ -19,9 +20,7 @@ def build_model():
     model.add(Dense(10, activation='softmax'))
 
     # Compile model
-	model.compile(optimizer='adam',
-                  loss='categorical_crossentropy',
-                  metrics=['accuracy'])
+    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
     return model
 
@@ -54,11 +53,18 @@ def main():
     features_test = test_data[:, :-1]
     target_test = test_data[:, -1]
 
-    estimator = KerasClassifier(build_fn=build_model, epochs=200, batch_size=5, verbose=0)
+    estimator = KerasClassifier(build_fn=build_model, epochs=10, batch_size=5, verbose=1)
     kfold = KFold(n_splits=10, shuffle=True)
     results = cross_val_score(estimator, features_train, target_train, cv=kfold)
     print("Baseline: %.2f%% (%.2f%%)" % (results.mean()*100, results.std()*100))
 
+    estimator.fit(features_train, target_train)
+
+    predictions = estimator.predict(features_test)
+
+    test_acc = accuracy_score(target_test, predictions)
+
+    print('Test accuracy: {}'.format(test_acc))
 
 if __name__ == '__main__':
     main()

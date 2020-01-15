@@ -25,7 +25,7 @@ def scatter_plot(features, target):
 def create_underfitting_model():
     model = Sequential()
 
-    model.add(Dense(64, input_dim=2, activation='relu'))
+    model.add(Dense(2, input_dim=2, activation='relu'))
     model.add(Dense(1, activation='sigmoid'))
 
     model.compile(optimizer='adam',
@@ -37,11 +37,8 @@ def create_underfitting_model():
 def create_optimal_model():
     model = Sequential()
 
-    model.add(Dense(256, input_dim=2, activation='relu'))
-    model.add(Dense(256, activation='relu'))
-    model.add(Dense(256, activation='relu'))
-    model.add(Dense(512, activation='relu'))
-    model.add(Dense(1024, activation='relu'))
+    model.add(Dense(16, input_dim=2, activation='relu'))
+    model.add(Dense(16, activation='relu'))
     model.add(Dense(1, activation='sigmoid'))
 
     model.compile(optimizer='adam',
@@ -57,11 +54,6 @@ def create_overfitting_model():
     model.add(Dense(256, activation='relu'))
     model.add(Dense(256, activation='relu'))
     model.add(Dense(512, activation='relu'))
-    model.add(Dense(512, activation='relu'))
-    model.add(Dense(512, activation='relu'))
-    model.add(Dense(512, activation='relu'))
-    model.add(Dense(1024, activation='relu'))
-    model.add(Dense(1024, activation='relu'))
     model.add(Dense(1, activation='sigmoid'))
 
     model.compile(optimizer='adam',
@@ -93,11 +85,23 @@ def plot_decision_boundary(model, features, target, xmin, xmax, x_density, ymin,
 
 
 def train_and_evaluate_model(model, features, target, name, epochs, batch_size):
-    model.fit(x=features,
-              y=target,
-              validation_split=0.2,
-              epochs=epochs,
-              batch_size=batch_size)
+    history = model.fit(x=features,
+                        y=target,
+                        validation_split=0.2,
+                        epochs=epochs,
+                        batch_size=batch_size)
+
+    train_loss = history.history['loss']
+    val_loss = history.history['val_loss']
+
+    # plot training and validation losses
+    plt.clf()
+    plt.plot(train_loss, 'r-', label='training loss')
+    plt.plot(val_loss, 'b-', label='validation loss')
+    plt.xlabel('epochs')
+    plt.title("Train and validation loss: {}".format(name))
+    plt.legend(loc='upper right')
+    plt.savefig('images/problem2/{}_model_loss.png'.format(name), dpi=300)
 
     acc = accuracy_score(target, model.predict(features) > 0.5)
     print('Accuracy of {} model: {}'.format(name, acc))

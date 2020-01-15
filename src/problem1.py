@@ -35,23 +35,6 @@ def create_regression_model():
     model.add(Dense(512, activation='relu'))
     model.add(Dense(512, activation='relu'))
     model.add(Dense(512, activation='relu'))
-    model.add(Dense(512, activation='relu'))
-    model.add(Dense(512, activation='relu'))
-    model.add(Dense(512, activation='relu'))
-    model.add(Dense(512, activation='relu'))
-    model.add(Dense(256, activation='relu'))
-    model.add(Dense(512, activation='relu'))
-    model.add(Dense(512, activation='relu'))
-    model.add(Dense(512, activation='relu'))
-    model.add(Dense(512, activation='relu'))
-    model.add(Dense(512, activation='relu'))
-    model.add(Dense(512, activation='relu'))
-    model.add(Dense(512, activation='relu'))
-    model.add(Dense(512, activation='relu'))
-    model.add(Dense(512, activation='relu'))
-    model.add(Dense(512, activation='relu'))
-    model.add(Dense(512, activation='relu'))
-    model.add(Dense(512, activation='relu'))
     model.add(Dense(1024, activation='relu'))
     model.add(Dense(1024, activation='relu'))
     model.add(Dense(1))
@@ -106,7 +89,7 @@ def main():
     val_loss = []
 
     # compile and fit the model
-    model.compile(optimizer=Adam(learning_rate=1e-5),
+    model.compile(optimizer=Adam(learning_rate=1e-4),
                   loss='mse')
     history = model.fit(x=features_train,
                         y=target_train,
@@ -118,7 +101,7 @@ def main():
     val_loss.extend(history.history['val_loss'])
 
     # recompile the model in order to use smaller learning rate
-    model.compile(optimizer=Adam(learning_rate=1e-6),
+    model.compile(optimizer=Adam(learning_rate=1e-5),
                   loss='mse')
     history = model.fit(x=features_train,
                         y=target_train,
@@ -133,6 +116,7 @@ def main():
     plt.plot(train_loss, 'r-', label='training loss')
     plt.plot(val_loss, 'b-', label='validation loss')
     plt.xlabel('epochs')
+    plt.legend(loc='upper right')
     plt.savefig('images/problem1/train_val_loss.png', dpi=300)
 
     # find predictions for every point the dataset
@@ -141,12 +125,16 @@ def main():
 
     # plot function trying to be fitted and function which the model has learneds
     plt.clf()
-    plt.plot(features_train, target_train, 'ro', linewidth=2, alpha=1, label='training points')  
+    # plt.plot(features_train, target_train, 'ro', linewidth=2, alpha=1, label='training points')  
     plt.plot(features, noisy_function, 'r-', linewidth=2, alpha=1, label='true function')  
-    plt.plot(features_val, target_val, 'bo', linewidth=2, alpha=1, label='validation points')   
+    # plt.plot(features_val, target_val, 'bo', linewidth=2, alpha=1, label='validation points')   
     plt.plot(sampled_points, pred, 'r-', linewidth=2, alpha=0.8, label='model prediction', color='green')
     plt.legend(loc='upper left')
     plt.savefig('images/problem1/model_prediction.png', dpi=300)
+
+    plt.clf()
+    plt.plot(sampled_points, pred, 'r-', linewidth=2, alpha=0.8, label='model prediction', color='green')
+    plt.savefig('images/problem1/regression_curve.png', dpi=300)
 
 if __name__ == '__main__':
     main()

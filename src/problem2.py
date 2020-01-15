@@ -1,13 +1,14 @@
 import matplotlib.pyplot as plt
 import numpy as np
-
-import config
 import scipy.io
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import (accuracy_score, classification_report,
+                             confusion_matrix)
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.layers import Activation, Dense
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.utils import plot_model
+
+import config
 
 
 def scatter_plot(features, target):
@@ -84,10 +85,46 @@ def plot_decision_boundary(model, features, target, xmin, xmax, x_density, ymin,
     plt.savefig(filepath, dpi=300)
 
 
+def plot_confusion_matrix(model, features, target, name, mode):
+    filepath = 'images/problem2/{}_{}_confusion_matrix.png'.format(name, mode)
+
+    prob_pred = model.predict(features)
+    class_pred = prob_pred > 0.5
+
+    # plot confusion matrix
+    cm = np.array(confusion_matrix(target, class_pred))
+    cm = cm / np.sum(cm)
+    tp = cm[0, 0]
+    fp = cm[0, 1]
+    fn = cm[1, 0]
+    tp = cm[1, 1]
+
+    precision = tp / (tp + fp)
+    recall = tp / (tp + fn)
+
+    print('Confusion matrix for {} model: {}'.format(name, cm))
+    print('Precision for {} model: {}'.format(name, precision))
+    print('Recall for {} model: {}'.format(name, recall))
+
+    plt.clf()
+    plt.matshow(cm, cmap=plt.cm.Blues)
+    for i in range(2):
+        for j in range(2):
+                plt.text(i, j, str(cm[i][j]), va='center', ha='center')
+    plt.title('Confusion matrix: {} model, {} data'.format(name, mode))
+    plt.savefig(filepath, dpi=300)
+
+
 def train_and_evaluate_model(model, features, target, name, epochs, batch_size):
-    history = model.fit(x=features,
-                        y=target,
-                        validation_split=0.2,
+    # split dataset onto train, validation and test part
+    features_train, \
+    features_test,  \
+    target_train,   \
+    target_test = train_test_split(features, target, test_size=0.2)
+    
+    history = model.fit(x=features_train,
+                        y=target_train,
+                        validation_data=(features_test, target_test),
                         epochs=epochs,
                         batch_size=batch_size)
 
@@ -103,9 +140,6 @@ def train_and_evaluate_model(model, features, target, name, epochs, batch_size):
     plt.legend(loc='upper right')
     plt.savefig('images/problem2/{}_model_loss.png'.format(name), dpi=300)
 
-    acc = accuracy_score(target, model.predict(features) > 0.5)
-    print('Accuracy of {} model: {}'.format(name, acc))
-
     plot_decision_boundary(model=model,
                            features=features,
                            target=target,
@@ -117,6 +151,18 @@ def train_and_evaluate_model(model, features, target, name, epochs, batch_size):
                            y_density=1000,
                            filepath='images/problem2/{}_decision_boundary.png'.format(name),
                            title='Decision boundary: {}'.format(name))
+
+    plot_confusion_matrix(model=model,
+                          features=features_train,
+                          target=target_train,
+                          name=name,
+                          mode='train')
+
+    plot_confusion_matrix(model=model,
+                          features=features_test,
+                          target=target_test,
+                          name=name,
+                          mode='test')
 
 
 def main():
@@ -132,17 +178,11 @@ def main():
 
     scatter_plot(features, target)
 
-    # split data into training and test set
-    features_train, \
-    features_test,  \
-    target_train,   \
-    target_test = train_test_split(features, target, test_size=0.2)
-
     if conf.UNDERFIT:
         underfit_model = create_underfitting_model()
         train_and_evaluate_model(model=underfit_model,
-                                 features=features_train, 
-                                 target=target_train,
+                                 features=features, 
+                                 target=target,
                                  name='underfit',
                                  epochs=conf.EPOCHS,
                                  batch_size=conf.BATCH_SIZE)
@@ -150,8 +190,8 @@ def main():
     if conf.OPTIMAL:
         optimal_model = create_optimal_model()
         train_and_evaluate_model(model=optimal_model,
-                                 features=features_train,
-                                 target=target_train,
+                                 features=features,
+                                 target=target,
                                  name='optimal',
                                  epochs=conf.EPOCHS,
                                  batch_size=conf.BATCH_SIZE)
@@ -159,8 +199,8 @@ def main():
     if conf.OVERFIT:
         overfit_model = create_overfitting_model()
         train_and_evaluate_model(model=overfit_model,
-                                 features=features_train,
-                                 target=target_train,
+                                 features=features,
+                                 target=target,
                                  name='overfit',
                                  epochs=conf.EPOCHS,
                                  batch_size=conf.BATCH_SIZE)

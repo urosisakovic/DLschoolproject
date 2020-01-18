@@ -82,8 +82,7 @@ def main():
 
     # uncompiled model
     model = create_regression_model()
-    plot_model(model, to_file='images/problem1/model.png')
-
+    
     # these lists will hold train and validation losses per epoch
     train_loss = []
     val_loss = []

@@ -47,4 +47,8 @@ C.PROBLEM3 = edict()
 
 C.PROBLEM3.TEST_DATASET_PATH = '../data3/PenDigits/pendigits.tes'
 C.PROBLEM3.TRAIN_DATASET_PATH = '../data3/PenDigits/pendigits.tra'
+C.PROBLEM3.EPOCHS = 300
+C.PROBLEM3.BATCH_SIZE = 120
+C.PROBLEM3.CLASS_OF_INTEREST = 0
+
 
